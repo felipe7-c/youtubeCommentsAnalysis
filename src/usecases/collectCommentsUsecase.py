@@ -10,7 +10,7 @@ class CollectCommentsUsecase:
         self.upload_playlist = upload_playlist
         self.youtube = build("youtube", "v3", developerKey=self.api_key)
 
-    def collectVideoIds(self, max_videos=10):
+    def collectVideoIds(self, max_videos=20):
 
         videos = []
         next_page = None
@@ -41,7 +41,7 @@ class CollectCommentsUsecase:
         return videos
 
 
-    def collectCommentsVideos(self, max_videos=10, max_comments_per_video=20):
+    def collectCommentsVideos(self, max_videos=20, max_comments_per_video=20):
 
         comments = []
 
