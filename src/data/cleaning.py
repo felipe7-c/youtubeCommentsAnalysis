@@ -10,7 +10,8 @@ class DataProcessing:
 
         for comment in self.comments:
             cleaned_comment = self.transformingData(comment)
-            cleaned_comments.append(cleaned_comment)
+            if cleaned_comment != "":
+                cleaned_comments.append(cleaned_comment)
         
         return cleaned_comments
     
