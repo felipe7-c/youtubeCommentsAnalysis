@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from src.usecases.collectCommentsUsecase import CollectCommentsUsecase
 from src.usecases.classifyCommentsUsecase import ClassifyCommentsUsecase
+from src.usecases.trainModelClassifier import TrainModelClassifier
 from src.data.cleaning import DataProcessing
 import pandas as pd
 from pathlib import Path
@@ -29,22 +30,26 @@ def getTreatedComments(api_key, channel_id, upload_playlist):
 
 def main():
 
+    project_root = Path(__file__).parent.parent.resolve()  
+
+    csv_path = project_root / "assets" / "comments_data.csv"
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+
     comments_treated = getTreatedComments(api_key, channel_id, upload_playlist)
 
     results_comments = ClassifyCommentsUsecase(grok_api_key=grok_api_key, comments=comments_treated, model_name=model_name).classify()
 
     df = pd.DataFrame({"comentarios" : comments_treated, "result" : results_comments})
 
-    project_root = Path(__file__).parent.parent.resolve()  # src/.. = raiz
-
-    csv_path = project_root / "assets" / "comments_data.csv"
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-
     # Salva CSV
     df.to_csv(csv_path, index=False)
 
     print(f"CSV salvo em: {csv_path}")
-    
+
+    # Treina modelo de classificação
+    inst_train_model = TrainModelClassifier(csv_path)
+    inst_train_model.train_model()
+
     return
 
 
