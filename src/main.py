@@ -46,13 +46,7 @@ def main():
 
     print(f"CSV salvo em: {csv_path}")
 
-    # Treina modelo de classificação
-    inst_train_model = TrainModelClassifier(csv_path)
-    inst_train_model.train_model()
-
     return
-
 
 if __name__ == "__main__":
     main()
-
