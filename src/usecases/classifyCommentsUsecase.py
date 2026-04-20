@@ -12,20 +12,26 @@ class ClassifyCommentsUsecase:
 
         results = []
 
-        for comment in self.comments:
+        for comment_number in range(0, len(self.comments), 3):
 
-            if comment.strip() == "":
+            comments = self.comments[comment_number: comment_number + 3]
+
+            comments = [comment.strip() for comment in comments if comment.strip() != ""]
+                
+            if not comments:
                 continue
 
             prompt = f"""
-            Classifique o comentário político como:
+            Classifique os comentários político como:
             - positivo
             - negativo
             - neutro
 
-            Responda apenas com uma palavra.
+            classifique conforme a ordem dos comentários abaixo com apenas uma palavra, 
+            um exemplo de resposta seria: "positivo, negativo, neutro, negativo, neutro" 
+            Atenção: não utilize abreviações apenas as palavras completas citadas acima.
 
-            Comentário: "{comment}"
+            Comentários: {"; ".join(f'"{comment}"' for comment in comments)}
             """
 
             completion = self.client.chat.completions.create(
@@ -38,7 +44,8 @@ class ClassifyCommentsUsecase:
             )
 
             label = completion.choices[0].message.content.strip().lower()
-            results.append(label)
+            array_label = label.split(",")
+            results.extend(array_label)
 
         return results
 
