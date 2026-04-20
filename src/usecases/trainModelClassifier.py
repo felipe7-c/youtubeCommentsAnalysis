@@ -82,9 +82,9 @@ class TrainModelClassifier:
         model = SimpleNN(input_size=X_train.shape[1], hidden_size = 100, num_classes = 3)
 
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01)
+        optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 
-        num_epochs = 10
+        num_epochs = 50
 
         for epoch in range(num_epochs):
             model.train()
@@ -106,6 +106,8 @@ class TrainModelClassifier:
 
             accuracy = (predicted == y_test).sum().item() / len(y_test)
             print(f"Acurácia: {accuracy:.4f}")
+
+        return model, vecotrizer, label_map
 
 
 
