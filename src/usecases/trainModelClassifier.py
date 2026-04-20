@@ -7,6 +7,23 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+nltk.download('rslp')
+nltk.download('punkt_tab')
+
+class SimpleNN(nn.Module):
+
+    def __init__(self, input_size, hidden_size, num_classes):
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return x
+
 class TrainModelClassifier:
     def __init__(self, data_path : str):
         self.data_path = data_path
@@ -62,6 +79,33 @@ class TrainModelClassifier:
         y_train = torch.tensor(y_train, dtype=torch.long)
         y_test = torch.tensor(y_test, dtype=torch.long)
 
+        model = SimpleNN(input_size=X_train.shape[1], hidden_size = 100, num_classes = 3)
+
+        criterion = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01)
+
+        num_epochs = 10
+
+        for epoch in range(num_epochs):
+            model.train()
+
+            outputs = model(X_train)
+            loss = criterion(outputs, y_train)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}")
+    
+        model.eval()
+
+        with torch.no_grad():
+            outputs = model(X_test)
+            _, predicted = torch.max(outputs, 1)
+
+            accuracy = (predicted == y_test).sum().item() / len(y_test)
+            print(f"Acurácia: {accuracy:.4f}")
 
 
 
