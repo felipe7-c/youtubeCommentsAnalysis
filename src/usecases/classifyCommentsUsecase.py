@@ -11,6 +11,7 @@ class ClassifyCommentsUsecase:
     def classify(self):
 
         results = []
+        comments_case = []
 
         for comment_number in range(0, len(self.comments), 3):
 
@@ -46,9 +47,10 @@ class ClassifyCommentsUsecase:
                 label = completion.choices[0].message.content.strip().lower()
                 array_label = label.split(",")
                 results.extend(array_label)
+                comments_case.extend(comments)
             except Exception as e:
                 print(f"Erro ao classificar comentários: {e}")
-                return results
+                return results, comments_case
 
-        return results
+        return results, comments_case
 
