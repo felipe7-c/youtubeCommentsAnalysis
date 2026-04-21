@@ -42,8 +42,11 @@ def main():
     df = pd.DataFrame({"comentarios" : comments_treated, "result" : results_comments})
 
     # Salva CSV
-    df.to_csv(csv_path, index=False)
+    if os.path.exists(csv_path):
+        df_before = pd.read_csv(csv_path)
+        df = pd.concat([df_before, df], ignore_index = True)
 
+    df.to_csv(csv_path, index=False)
     print(f"CSV salvo em: {csv_path}")
 
     return
