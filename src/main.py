@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from src.usecases.collectCommentsUsecase import CollectCommentsUsecase
 from src.usecases.classifyCommentsUsecase import ClassifyCommentsUsecase
-from src.usecases.trainModelClassifier import TrainModelClassifier
 from src.data.cleaning import DataProcessing
 import pandas as pd
 from pathlib import Path
