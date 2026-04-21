@@ -36,9 +36,9 @@ def main():
 
     comments_treated = getTreatedComments(api_key, channel_id, upload_playlist)
 
-    results_comments = ClassifyCommentsUsecase(grok_api_key=grok_api_key, comments=comments_treated, model_name=model_name).classify()
+    results_comments, comments_case = ClassifyCommentsUsecase(grok_api_key=grok_api_key, comments=comments_treated, model_name=model_name).classify()
 
-    df = pd.DataFrame({"comentarios" : comments_treated, "result" : results_comments})
+    df = pd.DataFrame({"comentarios" : comments_case, "result" : results_comments})
 
     # Salva CSV
     if os.path.exists(csv_path):
