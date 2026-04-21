@@ -2,6 +2,7 @@ import pandas as pd
 import nltk
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
@@ -67,7 +68,7 @@ class TrainModelClassifier:
             labels.append(label)
 
         #TF-IDF 
-        vecotrizer = TfidfVectorizer(max_df=0.6, min_df = 3, max_features=5000)
+        vecotrizer = TfidfVectorizer(max_df=0.6, min_df = 3, max_features=5000, ngram_range=(1,2))
         X = vecotrizer.fit_transform(processed_comments)
         X = X.toarray()
         y = labels
@@ -81,7 +82,10 @@ class TrainModelClassifier:
 
         model = SimpleNN(input_size=X_train.shape[1], hidden_size = 100, num_classes = 3)
 
-        criterion = nn.CrossEntropyLoss()
+        class_counts = torch.bincount(y_train)
+        class_weights = 1.0 / class_counts.float()
+
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
         optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 
         num_epochs = 50
@@ -106,6 +110,17 @@ class TrainModelClassifier:
 
             accuracy = (predicted == y_test).sum().item() / len(y_test)
             print(f"Acurácia: {accuracy:.4f}")
+
+            y_true = y_test.numpy()
+            y_pred = predicted.numpy()
+
+            # inverter label_map
+            inv_label_map = {v: k for k, v in label_map.items()}
+
+            target_names = [inv_label_map[i] for i in range(len(inv_label_map))]
+
+            print("\nRelatório por classe:\n")
+            print(classification_report(y_true, y_pred, target_names=target_names))
 
         return model, vecotrizer, label_map
 

@@ -33,19 +33,22 @@ class ClassifyCommentsUsecase:
 
             Comentários: {"; ".join(f'"{comment}"' for comment in comments)}
             """
+            try: 
+                completion = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=self.temperature,  
+                    max_completion_tokens=self.max_completion_tokens
+                )
 
-            completion = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=self.temperature,  
-                max_completion_tokens=self.max_completion_tokens
-            )
-
-            label = completion.choices[0].message.content.strip().lower()
-            array_label = label.split(",")
-            results.extend(array_label)
+                label = completion.choices[0].message.content.strip().lower()
+                array_label = label.split(",")
+                results.extend(array_label)
+            except Exception as e:
+                print(f"Erro ao classificar comentários: {e}")
+                return results
 
         return results
 
