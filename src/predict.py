@@ -1,12 +1,9 @@
-import torch
 import pickle
 import nltk
 from nltk.tokenize import word_tokenize
 from fastapi import FastAPI
 from pydantic import BaseModel
-import torch
 import pickle
-from src.usecases.trainModelClassifier import SimpleNN
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -28,11 +25,8 @@ class PredictionService:
         with open("models/label_map.pkl", "rb") as f:
             label_map = pickle.load(f)
 
-        input_size = len(vectorizer.get_feature_names_out())
-
-        model = SimpleNN(input_size=input_size, hidden_size=100, num_classes=3)
-        model.load_state_dict(torch.load("models/model.pth"))
-        model.eval()
+        with open("models/model.pkl", "rb") as f:
+            model = pickle.load(f)
 
         return vectorizer, label_map, model
     
@@ -49,16 +43,13 @@ class PredictionService:
     def predict(self, text):
         processed = self.preprocess(text)
 
-        X = self.vectorizer.transform([processed]).toarray()
-        X = torch.tensor(X, dtype=torch.float32)
+        X = self.vectorizer.transform([processed])
 
-        with torch.no_grad():
-            output = self.model(X)
-            _, pred = torch.max(output, 1)
+        pred = self.model.predict(X)[0]
 
         inv_map = {v: k for k, v in self.label_map.items()}
 
-        return inv_map[pred.item()]
+        return inv_map[pred]
 
 app = FastAPI()
 
