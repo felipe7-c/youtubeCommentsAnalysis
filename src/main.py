@@ -1,11 +1,8 @@
 import os
 from dotenv import load_dotenv
-from src.usecases.collectCommentsUsecase import CollectCommentsUsecase
-from src.usecases.classifyCommentsUsecase import ClassifyCommentsUsecase
-from src.data.cleaning import DataProcessing
-import pandas as pd
 from pathlib import Path
-import pandas as pd
+from src.domain.collectDataDomain import CollectDataDomain
+from src.domain.trainModelDomain import TrainModelDomain
 
 load_dotenv()
 api_key = os.getenv("api_key")
@@ -14,39 +11,22 @@ upload_playlist = os.getenv("uploads_playlist")
 grok_api_key = os.getenv("grok_api_key")
 model_name = os.getenv("model_name")
 
-def getTreatedComments(api_key, channel_id, upload_playlist):
-    #Instancia Usecase
-    inst_collectData = CollectCommentsUsecase(api_key, channel_id, upload_playlist)
-
-    #Collect Videos Comments
-    comments = inst_collectData.collectCommentsVideos()
-
-    inst_comments_treat = DataProcessing(comments)
-    
-    treated_data = inst_comments_treat.cleaningData()
-
-    return treated_data
-
 def main():
 
     project_root = Path(__file__).parent.parent.resolve()  
 
     csv_path = project_root / "assets" / "comments_data.csv"
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    model_path = project_root / "models"
+    model_path.mkdir(parents=True, exist_ok=True)
 
-    comments_treated = getTreatedComments(api_key, channel_id, upload_playlist)
+    collect_data_domain = CollectDataDomain(api_key, channel_id, upload_playlist, grok_api_key, model_name)
+    train_model_domain = TrainModelDomain(csv_path)
 
-    results_comments, comments_case = ClassifyCommentsUsecase(grok_api_key=grok_api_key, comments=comments_treated, model_name=model_name).classify()
+    #Coleta os dados rotulados
+    collect_data_domain.collectAndClassifyComments()
 
-    df = pd.DataFrame({"comentarios" : comments_case, "result" : results_comments})
-
-    # Salva CSV
-    if os.path.exists(csv_path):
-        df_before = pd.read_csv(csv_path)
-        df = pd.concat([df_before, df], ignore_index = True)
-
-    df.to_csv(csv_path, index=False)
-    print(f"CSV salvo em: {csv_path}")
+    #Treina o modelo e salva
+    train_model_domain.train_model()
 
     return
 
