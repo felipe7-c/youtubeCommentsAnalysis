@@ -4,26 +4,10 @@ from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
-import torch
-import torch.nn as nn
-from torch.nn import functional as F
+from sklearn.neural_network import MLPClassifier
 
 nltk.download('rslp')
 nltk.download('punkt_tab')
-
-class SimpleNN(nn.Module):
-
-    def __init__(self, input_size, hidden_size, num_classes):
-        super(SimpleNN, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, num_classes)
-
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        return x
 
 class TrainModelClassifier:
     def __init__(self, data_path : str):
@@ -58,71 +42,39 @@ class TrainModelClassifier:
             "negativo": 0,
             "neutro": 2
         }
-        for index, row in self.df.iterrows():
+
+        for _, row in self.df.iterrows():
             comment = row['comentarios']
             label = row['result']
 
             processed_comment = self.preprocess_data(comment)
-            label = label_map[label]
             processed_comments.append(processed_comment)
-            labels.append(label)
+            labels.append(label_map[f'{label.strip()}'])
 
-        #TF-IDF 
-        vecotrizer = TfidfVectorizer(max_df=0.6, min_df = 3, max_features=5000, ngram_range=(1,2))
-        X = vecotrizer.fit_transform(processed_comments)
-        X = X.toarray()
+        vectorizer = TfidfVectorizer(
+            max_df=0.6,
+            min_df=3,
+            max_features=5000,
+            ngram_range=(1, 2)
+        )
+
+        X = vectorizer.fit_transform(processed_comments)
         y = labels
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state = 28)
-        
-        X_train = torch.tensor(X_train, dtype=torch.float32)
-        X_test = torch.tensor(X_test, dtype=torch.float32)
-        y_train = torch.tensor(y_train, dtype=torch.long)
-        y_test = torch.tensor(y_test, dtype=torch.long)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=28
+        )
 
-        model = SimpleNN(input_size=X_train.shape[1], hidden_size = 100, num_classes = 3)
+        model = MLPClassifier(
+            hidden_layer_sizes=(100,),
+            max_iter=300,
+            random_state=42
+        )
 
-        class_counts = torch.bincount(y_train)
-        class_weights = 1.0 / class_counts.float()
+        model.fit(X_train, y_train)
 
-        criterion = nn.CrossEntropyLoss(weight=class_weights)
-        optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+        y_pred = model.predict(X_test)
 
-        num_epochs = 50
+        print(classification_report(y_test, y_pred))
 
-        for epoch in range(num_epochs):
-            model.train()
-
-            outputs = model(X_train)
-            loss = criterion(outputs, y_train)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}")
-    
-        model.eval()
-
-        with torch.no_grad():
-            outputs = model(X_test)
-            _, predicted = torch.max(outputs, 1)
-
-            accuracy = (predicted == y_test).sum().item() / len(y_test)
-            print(f"Acurácia: {accuracy:.4f}")
-
-            y_true = y_test.numpy()
-            y_pred = predicted.numpy()
-
-            # inverter label_map
-            inv_label_map = {v: k for k, v in label_map.items()}
-
-            target_names = [inv_label_map[i] for i in range(len(inv_label_map))]
-
-            print("\nRelatório por classe:\n")
-            print(classification_report(y_true, y_pred, target_names=target_names))
-
-        return model, vecotrizer, label_map
-
-
-
+        return model, vectorizer, label_map

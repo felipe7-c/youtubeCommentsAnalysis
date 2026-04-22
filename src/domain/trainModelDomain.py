@@ -1,12 +1,11 @@
 from src.usecases.trainModelClassifier import TrainModelClassifier
-import torch
 import pickle
 from pathlib import Path
 
 class TrainModelDomain:
-    def __init__(self, csv_path : str):
+    def __init__(self, csv_path: str, project_root: str):
         self.csv_path = csv_path
-        project_root = Path(__file__).parent.parent.resolve()  
+        self.project_root = project_root
 
         csv_path = project_root / "assets" / "comments_data.csv"
         self.model_path = project_root / "models"
@@ -18,7 +17,8 @@ class TrainModelDomain:
 
         model, vectorizer, label_map = inst_train_model.train_model()
 
-        torch.save(model.state_dict(), self.model_path / "model.pth")
+        with open(self.model_path / "model.pkl", "wb") as f:
+            pickle.dump(model, f)
 
         with open(self.model_path / "vectorizer.pkl", "wb") as f:
             pickle.dump(vectorizer, f)

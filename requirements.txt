@@ -1,10 +1,7 @@
 fastapi
 uvicorn
-torch
 scikit-learn
 nltk
 pydantic
 python-dotenv
 pandas
-nltk
-torch
