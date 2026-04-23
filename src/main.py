@@ -19,11 +19,11 @@ def main():
     model_path = project_root / "models"
     model_path.mkdir(parents=True, exist_ok=True)
 
-    collect_data_domain = CollectDataDomain(api_key, channel_id, upload_playlist, grok_api_key, model_name)
+    collect_data_domain = CollectDataDomain(api_key, channel_id, upload_playlist, grok_api_key, model_name, csv_path)
     train_model_domain = TrainModelDomain(csv_path, project_root)
 
     #Coleta os dados rotulados
-    """ collect_data_domain.collectAndClassifyComments() """
+    collect_data_domain.collectAndClassifyComments()
 
     #Treina o modelo e salva
     train_model_domain.train_model()
