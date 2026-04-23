@@ -4,7 +4,7 @@ from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
 
 nltk.download('rslp')
 nltk.download('punkt_tab')
@@ -62,13 +62,13 @@ class TrainModelClassifier:
         y = labels
 
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=28
+            X, y, test_size=0.2, random_state=28, stratify = y
         )
 
-        model = MLPClassifier(
-            hidden_layer_sizes=(100,),
-            max_iter=300,
-            random_state=42
+        model = LogisticRegression(
+            max_iter = 1000,
+            random_state = 42,
+            class_weight = "balanced"   
         )
 
         model.fit(X_train, y_train)
