@@ -8,6 +8,65 @@ A arquitetura foi projetada com foco em **modularidade, reprodutibilidade e esca
 
 ---
 
+## Resultados dos Modelos de Classificação de Comentários
+
+Este documento resume os experimentos realizados até o momento no projeto de classificação de sentimentos em comentários políticos utilizando TF-IDF + modelos tradicionais de Machine Learning.
+
+
+## Resultados dos Modelos
+
+### MLPClassifier (Rede Neural)
+
+* Accuracy: 0.68
+* Macro F1: 0.50
+* Problema: forte viés para classe 0
+* Baixo recall nas classes minoritárias
+
+---
+
+### Logistic Regression (class_weight='balanced') - Atual
+
+* Accuracy: 0.64
+* Macro F1: 0.53 (melhor geral)
+* Classe 0: F1 = 0.76
+* Classe 1: F1 = 0.46
+* Classe 2: F1 = 0.38
+
+✔ Melhor equilíbrio entre classes
+✔ Melhor recall nas classes minoritárias
+
+---
+
+### LinearSVC
+
+* Accuracy: 0.69 (maior accuracy)
+* Macro F1: 0.50
+* Problema: maior viés para classe 0
+* Pior recall nas classes minoritárias
+
+---
+
+## Comparativo geral de modelos utilizados
+
+| Modelo              | Accuracy | Macro F1 | Observação principal             |
+| ------------------- | -------- | -------- | -------------------------------- |
+| MLPClassifier       | 0.68     | 0.50     | Viés forte na classe majoritária |
+| Logistic Regression | 0.64     | 0.53     | Melhor equilíbrio geral          |
+| LinearSVC           | 0.69     | 0.50     | Maior accuracy, pior equilíbrio  |
+
+---
+
+### Conclusões
+
+* O melhor modelo até o momento é a **Logistic Regression com class_weight='balanced'**
+* O problema atual não está no modelo, mas sim:
+
+  * Desbalanceamento de classes
+  * Qualidade/ruído dos rótulos (gerados via LLM)
+  * Limitação da representação TF-IDF
+
+---
+
 ## ⚙️ Arquitetura do Sistema
 
 O pipeline é estruturado em etapas independentes:
