@@ -32,8 +32,8 @@ Este documento resume os experimentos realizados até o momento no projeto de cl
 * Classe 1: F1 = 0.46
 * Classe 2: F1 = 0.38
 
-✔ Melhor equilíbrio entre classes
-✔ Melhor recall nas classes minoritárias
+-  Melhor equilíbrio entre classes
+-  Melhor recall nas classes minoritárias
 
 ---
 
