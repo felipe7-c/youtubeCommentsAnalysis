@@ -35,3 +35,12 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .env
+
+
+models/
+*.pkl
+*.bin
+
+models/*
+!models/model.pkl
+!models/label_map.pkl
