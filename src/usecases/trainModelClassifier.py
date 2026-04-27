@@ -10,13 +10,30 @@ nltk.download('rslp')
 nltk.download('punkt_tab')
 
 class TrainModelClassifier:
-    def __init__(self, data_path : str):
+    def __init__(self, data_path : str, data_comp_path : str):
         self.data_path = data_path
-        self.df = pd.read_csv(self.data_path)
+        if data_comp_path is None:
+            self.df = pd.read_csv(self.data_path)
+        else:
+            df1 = pd.read_csv(self.data_path)
+            df2 = pd.read_csv(data_comp_path, encoding="latin-1")
+            self.df = pd.concat([df1, df2], ignore_index=True)
+
+        self.df["comentarios"] = self.df["comentarios"].fillna("").astype(str)
+        self.df["result"] = self.df["result"].fillna("").astype(str)
+        self.df["result"] = self.df["result"].str.strip().str.lower()
+
+        self.df = self.df[self.df["result"].isin(["positivo", "negativo", "neutro"])]
+
+        print(self.df["result"].value_counts())
+        
         self.stop_words = nltk.corpus.stopwords.words('portuguese')
         self.stemmer = nltk.stem.RSLPStemmer()        
 
     def preprocess_data(self, comment : str):
+
+        if not isinstance(comment, str):
+            return ""
 
         #Minusculo
         comment = comment.lower()
@@ -43,6 +60,12 @@ class TrainModelClassifier:
             "neutro": 2
         }
 
+        #Balanceamento de classes: amostragem aleatória de 1000 comentários
+        df_neg = self.df[self.df["result"] == "negativo"].sample(1000)
+        df_other = self.df[self.df["result"] != "negativo"]
+
+        self.df = pd.concat([df_neg, df_other])
+
         for _, row in self.df.iterrows():
             comment = row['comentarios']
             label = row['result']
@@ -50,7 +73,7 @@ class TrainModelClassifier:
             processed_comment = self.preprocess_data(comment)
             processed_comments.append(processed_comment)
             labels.append(label_map[f'{label.strip()}'])
-
+        
         vectorizer = TfidfVectorizer(
             max_df=0.6,
             min_df=3,
