@@ -5,3 +5,4 @@ nltk
 pydantic
 python-dotenv
 pandas
+sentence-transformers
