@@ -22,14 +22,16 @@ class TrainModelDomain:
 
         inst_train_model = TrainModelClassifier(self.csv_path, self.csv_comp_path)
 
-        model, vectorizer, label_map = inst_train_model.train_model()
+        model, embedding_model, label_map = inst_train_model.train_model()
 
+        # Salvar modelo de classificação (sklearn)
         with open(self.model_path / "model.pkl", "wb") as f:
             pickle.dump(model, f)
 
-        with open(self.model_path / "vectorizer.pkl", "wb") as f:
-            pickle.dump(vectorizer, f)
+        # Salvar embedding model corretamente (SentenceTransformer)
+        embedding_model.save(str(self.model_path / "embedding_model"))
 
+        # Salvar label map
         with open(self.model_path / "label_map.pkl", "wb") as f:
             pickle.dump(label_map, f)
 
