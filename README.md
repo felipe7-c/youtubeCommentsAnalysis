@@ -1,217 +1,184 @@
-# 🧠 NLP Comment Classification Pipeline
+# NLP Comment Classification Pipeline
+Sistema de Machine Learning end-to-end para classificação de comentários, com deploy em produção utilizando FastAPI, Docker e AWS EC2.
 
-## 📌 Overview
+## Problema
 
-Este projeto implementa um pipeline completo de Machine Learning para classificação de comentários, combinando coleta automatizada de dados, rotulação assistida por LLM e treinamento supervisionado.
+Classificação de comentários em três categorias:
 
-A arquitetura foi projetada com foco em **modularidade, reprodutibilidade e escalabilidade**, seguindo boas práticas de sistemas de ML em produção.
+- Positivo
+- Neutro
+- Negativo
 
----
+### Principais desafios
 
-## Resultados dos Modelos de Classificação de Comentários
-
-Este documento resume os experimentos realizados até o momento no projeto de classificação de sentimentos em comentários políticos utilizando TF-IDF + modelos tradicionais de Machine Learning.
-
-
-## Resultados dos Modelos
-
-### MLPClassifier (Rede Neural)
-
-* Accuracy: 0.68
-* Macro F1: 0.50
-* Problema: forte viés para classe 0
-* Baixo recall nas classes minoritárias
+- Desbalanceamento de classes
+- Ruído na rotulação gerada por LLM
+- Limitações de representações baseadas em TF-IDF
 
 ---
 
-### Logistic Regression (class_weight='balanced') - Atual
+## Solução
 
-* Accuracy: 0.64
-* Macro F1: 0.53 (melhor geral)
-* Classe 0: F1 = 0.76
-* Classe 1: F1 = 0.46
-* Classe 2: F1 = 0.38
+Pipeline completo de Machine Learning desenvolvido com foco em engenharia, priorizando:
 
--  Melhor equilíbrio entre classes
--  Melhor recall nas classes minoritárias
+- Modularidade e separação de responsabilidades
+- Reprodutibilidade de experimentos
+- Escalabilidade do pipeline
+- Estrutura preparada para produção
 
----
+### Evolução da abordagem
 
-### LinearSVC
+#### Baseline (TF-IDF + modelos tradicionais)
 
-* Accuracy: 0.69 (maior accuracy)
-* Macro F1: 0.50
-* Problema: maior viés para classe 0
-* Pior recall nas classes minoritárias
+| Modelo | Accuracy | Macro F1 |
+|--------|----------|----------|
+| MLPClassifier | 0.68 | 0.50 |
+| Logistic Regression | 0.64 | 0.53 |
+| LinearSVC | 0.69 | 0.50 |
 
----
+**Observações:**
 
-## Comparativo geral de modelos utilizados
+- Boa accuracy, mas baixa generalização
+- Forte sensibilidade ao desbalanceamento
+- Limitação semântica do TF-IDF
 
-| Modelo              | Accuracy | Macro F1 | Observação principal             |
-| ------------------- | -------- | -------- | -------------------------------- |
-| MLPClassifier       | 0.68     | 0.50     | Viés forte na classe majoritária |
-| Logistic Regression | 0.64     | 0.53     | Melhor equilíbrio geral          |
-| LinearSVC           | 0.69     | 0.50     | Maior accuracy, pior equilíbrio  |
+#### Versão final (Embeddings + Logistic Regression)
 
----
+Substituição do pipeline de features:
 
-### Conclusões
+- TF-IDF → embeddings com Transformers
+- Representação sintática → representação semântica contextual
 
-* O melhor modelo até o momento é a **Logistic Regression com class_weight='balanced'**
-* O problema atual não está no modelo, mas sim:
+### Melhorias implementadas
 
-  * Desbalanceamento de classes
-  * Qualidade/ruído dos rótulos (gerados via LLM)
-  * Limitação da representação TF-IDF
+**Dados**
+- Subamostragem da classe majoritária
+- Adição de dados sintéticos (+200 positivos e +200 neutros)
+- Melhor balanceamento do dataset
 
----
+**Modelagem**
+- Migração de TF-IDF para embeddings com Transformers
+- Melhor captura de contexto semântico
+- Redução de overfitting em padrões superficiais
 
-## ⚙️ Arquitetura do Sistema
-
-O pipeline é estruturado em etapas independentes:
-
-Data Collection → Data Processing → LLM Labeling → Model Training → Inference
-
-Cada etapa é desacoplada, permitindo evolução e substituição de componentes sem impacto no restante do sistema.
+**Pipeline**
+- Separação clara entre etapas de processamento
+- Componentização dos módulos
+- Arquitetura preparada para substituição de componentes
 
 ---
 
-## 🧩 Componentes
+## Arquitetura
 
-### 🔹 Domain Layer
+### Pipeline end-to-end
 
-Camada responsável pela **orquestração das regras de negócio e fluxo do pipeline de ML**.
+```text
+Data Collection → Processing → LLM Labeling → Training → Inference API
+```
 
-Atua como intermediária entre a orquestração principal (`main.py`) e os casos de uso, garantindo separação de responsabilidades e organização do fluxo.
+### Fluxo de execução
 
-**Responsabilidades:**
-- Coordenar execução dos pipelines
-- Encapsular lógica de alto nível
-- Garantir consistência entre etapas do fluxo
+```
+main.py
+→ coleta de dados
+→ processamento
+→ rotulação com LLM
+→ treino do modelo
+→ salvamento de assets e modelos
+→ API de inferência (predict.py)
+```
 
-**Componentes:**
-- `collectDataDomain.py`
-- `trainModelDomain.py`
+### Estrutura em camadas
 
----
+**Domain Layer**
+- Orquestração do fluxo de ML
+- Regras de negócio do pipeline
+- Coordenação entre etapas
 
-### 🔹 Use Cases Layer
+**Use Cases Layer**
+- Coleta de dados (YouTube API)
+- Rotulação com LLM
+- Treinamento do modelo
 
-Camada responsável pela implementação das ações específicas do sistema:
+**Data Layer**
+- Limpeza e normalização
+- Preparação dos dados
 
-- Coleta de comentários via API (YouTube)
-- Classificação de texto
-- Geração de dataset rotulado utilizando LLM (data-centric approach)
+**Inference Layer (FastAPI)**
+- Serviço de predição em tempo real
+- Carregamento do modelo treinado
+- Endpoint de inferência
 
----
+### Tecnologias utilizadas
 
-### 🔹 Data Processing Layer
-
-Responsável pelo pré-processamento dos dados textuais:
-
-- Limpeza (remoção de emojis, caracteres especiais)
-- Normalização (case folding)
-- Preparação para vetorização
-
----
-
-### 🔹 EDA & Analysis (Notebooks)
-
-Ambiente dedicado à análise exploratória:
-
-- Distribuição de classes
-- Identificação de desbalanceamento
-- Avaliação da qualidade dos dados rotulados
-
----
-
-### 🔹 Data Pipeline (`main.py`)
-
-Camada de orquestração do fluxo completo:
-
-- Inicializa variáveis de ambiente
-- Instancia camadas de domínio
-- Executa pipeline de coleta e treinamento
-
-**Fluxo:**
-1. `CollectDataDomain` → coleta e rotula dados
-2. `TrainModelDomain` → treina modelo supervisionado
-
-**Output:**
-- Assets/CommentsData.csv
-- Models/
+- Python
+- Scikit-learn
+- Transformers (embeddings)
+- FastAPI
+- Pandas / NumPy
+- YouTube API
+- LLM para rotulação
+- Docker
+- AWS EC2
 
 ---
 
-### 🔹 Training Pipeline (`train.py`)
+## Resultados
 
-Pipeline de treinamento supervisionado:
+| Modelo | Accuracy | Macro F1 |
+|--------|----------|----------|
+| Transformer Embeddings + Logistic Regression | 0.65 | 0.64 |
 
-- Vetorização de texto (TF-IDF)
-- Treinamento do modelo de classificação
-- Serialização dos artefatos
+### Desempenho por classe
 
-**Outputs:**
-- Models/model.pth
-- Models/vectorizer.pkl
-- Models/labelmap.pkl
+| Classe | Precision | Recall | F1-score |
+|--------|-----------|--------|----------|
+| Negativo | 0.69 | 0.66 | 0.67 |
+| Positivo | 0.65 | 0.67 | 0.66 |
+| Neutro | 0.59 | 0.62 | 0.61 |
 
----
-
-### 🔹 Model Artifacts
-
-Separação clara entre dados e modelo:
-
-- **Assets/**
-  - Dataset processado e rotulado
-- **Models/**
-  - Modelo treinado
-  - Vetorizador
-  - Mapeamento de labels
-
-Essa estrutura garante **reprodutibilidade e portabilidade do modelo**.
+A evolução de TF-IDF para embeddings contextuais resultou em melhor generalização do modelo e maior equilíbrio entre classes, com Macro F1 passando de 0.50–0.53 para 0.64.
 
 ---
 
-### 🔹 Inference Layer (`predict.py`)
+## Deploy
 
-Camada de inferência exposta via API (FastAPI + Uvicorn):
-
-- Carregamento dos artefatos treinados
-- Pré-processamento consistente com treino
-- Predição em tempo real via endpoint HTTP
-
----
-
-## 🔄 Fluxo de Dados
-
-main.py  
-→ Domain Layer  
-→ Use Cases  
-→ Assets/ (dados)  
-→ Models/ (modelo treinado)  
-→ predict.py (API de inferência)
-
----
-
-## 🧠 Arquitetura de Execução
-
-### 🔹 Offline (Treinamento)
+### Containerização (Docker)
 
 ```bash
-python src.main.py
+docker build -t nlp-comment-classifier .
+docker run -p 8000:8000 nlp-comment-classifier
 ```
 
-- Coleta dados
-- Rotula via LLM
-- Treina modelo
-- Salva artefatos
+**Benefícios:**
 
-### 🔹 Online (Inferência)
+- Ambiente padronizado entre desenvolvimento e produção
+- Facilidade de deploy
+- Isolamento de dependências
 
+### AWS EC2
+
+```text
+Docker Image → AWS EC2 Instance → FastAPI Service → Inference Endpoint
 ```
+
+**Características:**
+
+- Execução em ambiente Linux (Ubuntu)
+- Serviço FastAPI exposto via porta pública
+- Uso de container Docker para consistência entre ambientes
+- Inferência acessível remotamente via API
+
+### Execução local
+
+**Treinamento:**
+
+```bash
+python src/main.py
+```
+
+**Inferência:**
+
+```bash
 uvicorn src.predict:app --reload
 ```
-
-- Infere a partir do modelo salvo
