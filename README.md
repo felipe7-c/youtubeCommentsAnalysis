@@ -1,5 +1,40 @@
 # NLP Comment Classification Pipeline
-Sistema de Machine Learning end-to-end para classificação de comentários, com deploy em produção utilizando FastAPI, Docker e AWS EC2.
+
+## Overview
+
+Sistema de Machine Learning end-to-end para análise de sentimentos em comentários, com pipeline completo de dados, treinamento de modelo e deploy em produção.
+
+✔ API pública em produção na AWS EC2  
+✔ Modelo NLP baseado em embeddings (Transformers)  
+✔ Arquitetura modular e escalável  
+✔ Pipeline completo (data → training → inference)
+
+## Live API
+
+Endpoint público:
+
+[Swagger UI](http://32.192.183.13:8000/docs)
+
+### Acesso Rápido
+
+- Predict endpoint: `/predict`  
+- Method: `POST`
+
+## Teste rápido da API
+
+```bash
+curl -X POST "http://32.192.183.13:8000/predict" \
+-H "Content-Type: application/json" \
+-d '{"text": "isso é muito bom"}'
+```
+
+Resposta:
+
+```json
+{
+  "prediction": "positivo"
+}
+```
 
 ## Problema
 
