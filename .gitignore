@@ -36,11 +36,9 @@ __pycache__/
 Thumbs.db
 .env
 
-
-models/
-*.pkl
-*.bin
-
+# ignora tudo dentro de models
 models/*
+
+# EXCETO os arquivos necessários
 !models/model.pkl
 !models/label_map.pkl

@@ -12,14 +12,10 @@ class PredictionService:
         self.embedding_model, self.label_map, self.model = self.load_artifacts()
 
     def load_artifacts(self):
-        # embedding model 
-        embedding_model = SentenceTransformer("models/embedding_model")
-
-        # label map
+        embedding_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2", device = "cpu")
         with open("models/label_map.pkl", "rb") as f:
             label_map = pickle.load(f)
 
-        # logistic regression model
         with open("models/model.pkl", "rb") as f:
             model = pickle.load(f)
 
@@ -27,7 +23,14 @@ class PredictionService:
 
     def predict(self, text: str):
 
-        X = self.embedding_model.encode([text])
+        if not text or not text.strip():
+            return "invalid_input"
+
+        X = self.embedding_model.encode(
+            [text],
+            convert_to_numpy=True,
+            show_progress_bar=False
+        )
 
         pred = self.model.predict(X)[0]
 
@@ -38,8 +41,16 @@ class PredictionService:
 
 
 app = FastAPI()
-service = PredictionService()
+service = None
 
+@app.on_event("startup")
+def load_model():
+    global service
+    try:
+        service = PredictionService()
+    except Exception as e:
+        print(f"Erro ao carregar modelo: {e}")
+        raise e
 
 @app.post("/predict")
 def predict_endpoint(request: CommentRequest):

@@ -28,9 +28,6 @@ class TrainModelDomain:
         with open(self.model_path / "model.pkl", "wb") as f:
             pickle.dump(model, f)
 
-        # Salvar embedding model corretamente (SentenceTransformer)
-        embedding_model.save(str(self.model_path / "embedding_model"))
-
         # Salvar label map
         with open(self.model_path / "label_map.pkl", "wb") as f:
             pickle.dump(label_map, f)
