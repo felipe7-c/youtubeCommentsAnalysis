@@ -2,12 +2,15 @@
 
 ## Overview
 
-Sistema de Machine Learning end-to-end para análise de sentimentos em comentários, com pipeline completo de dados, treinamento de modelo e deploy em produção.
+Sistema de Machine Learning end-to-end para análise de sentimentos em comentários, com pipeline completo de dados, treinamento de modelo, deploy e serving em produção.
 
 ✔ API pública em produção na AWS EC2  
 ✔ Modelo NLP baseado em embeddings (Transformers)  
 ✔ Arquitetura modular e escalável  
 ✔ Pipeline completo (data → training → inference)
+✔ Orquestração de infraestrutura com agendamento via EventBridge Scheduler
+✔ Otimização de custos com políticas automatizadas de start/stop da instância (execução apenas em dias úteis, 08:00–21:00)
+✔ Separação clara entre camadas de dados, lógica de negócio e serving (boas práticas de MLOps)
 
 ## Live API
 
