@@ -169,7 +169,7 @@ main.py
 |--------|----------|----------|
 | Transformer Embeddings + Logistic Regression | 0.65 | 0.64 |
 
-![Arquitetura do Projeto](docs/tabela_verdade_results.png)
+![Matriz Confusao](docs/tabela_verdade_results.png)
 
 ### Análise do Modelo
 - Bom desempenho em sentimentos explícitos
