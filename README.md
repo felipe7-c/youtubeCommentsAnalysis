@@ -16,7 +16,7 @@ Sistema de Machine Learning end-to-end para análise de sentimentos em comentár
 
 Endpoint público:
 
-[Swagger UI](http://54.166.221.63:8000/docs)
+[Swagger UI](http://35.153.194.48:8000/docs)
 
 ### Acesso Rápido
 
@@ -26,7 +26,7 @@ Endpoint público:
 ## Teste rápido da API
 
 ```bash
-curl -X POST "http://54.166.221.63:8000/predict" \
+curl -X POST "http://35.153.194.48:8000/predict" \
 -H "Content-Type: application/json" \
 -d '{"text": "isso é muito bom"}'
 ```
