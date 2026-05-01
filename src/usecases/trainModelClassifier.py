@@ -51,8 +51,11 @@ class TrainModelClassifier:
         X = model_emb.encode(processed_comments.to_list())
         y = labels
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=28, stratify = y
+        # Adicionar índices para rastrear os comentários originais
+        indices = pd.Series(range(len(self.df)))
+
+        X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
+            X, y, indices, test_size=0.2, random_state=28, stratify = y
         )
 
         model = LogisticRegression(
@@ -67,4 +70,16 @@ class TrainModelClassifier:
 
         print(classification_report(y_test, y_pred))
 
-        return model, model_emb, label_map
+        reverse_label_map = {v: k for k, v in label_map.items()}
+        
+        y_proba = model.predict_proba(X_test)
+        confidence = y_proba.max(axis=1)
+        
+        test_data = pd.DataFrame({
+            'comentarios': self.df.iloc[idx_test.values]['comentarios'].values,
+            'label_verdadeiro': [reverse_label_map[label] for label in y_test.values],
+            'label_predito': [reverse_label_map[label] for label in y_pred],
+            'confidence': confidence
+        })
+
+        return model, model_emb, label_map, test_data, X_test, y_test

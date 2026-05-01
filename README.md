@@ -108,6 +108,8 @@ Substituição do pipeline de features:
 
 ## Arquitetura
 
+![Arquitetura do Projeto](docs/arquitetura.png)
+
 ### Pipeline end-to-end
 
 ```text
@@ -167,6 +169,26 @@ main.py
 |--------|----------|----------|
 | Transformer Embeddings + Logistic Regression | 0.65 | 0.64 |
 
+![Arquitetura do Projeto](docs/tabela_verdade_results.png)
+
+### Análise do Modelo
+- Bom desempenho em sentimentos explícitos
+- Comentários claramente positivos ou negativos são bem classificados.
+- Dificuldade com classe neutra
+- Maior parte dos erros ocorre entre:
+    neutro → positivo
+    neutro → negativo
+- Ambiguidade e contexto
+  Comentários com múltiplos sentimentos ou contexto implícito geram erros.
+- Textos curtos / pouco informativos
+    Frases com baixa densidade semântica reduzem a qualidade dos embeddings.
+
+### Conclusão
+O modelo captura bem polaridade básica, mas tem limitações em:
+  * nuance semântica
+  * ambiguidade
+  * neutralidade
+
 ### Desempenho por classe
 
 | Classe | Precision | Recall | F1-score |
@@ -220,3 +242,11 @@ python src/main.py
 ```bash
 uvicorn src.predict:app --reload
 ```
+--- 
+## Melhorias Futuras
+
+* Fine-tuning de modelos Transformers para melhor captura de contexto
+* Melhoria da qualidade e balanceamento dos dados (especialmente classe neutra)
+* Análise mais profunda de erros para identificar padrões
+* Versionamento e monitoramento do modelo em produção
+* Exposição de métricas de confiança na API

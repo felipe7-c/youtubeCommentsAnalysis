@@ -23,7 +23,7 @@ def main():
     train_model_domain = TrainModelDomain(csv_path, project_root)
 
     #Coleta os dados rotulados
-    """ collect_data_domain.collectAndClassifyComments() """
+    collect_data_domain.collectAndClassifyComments()
 
     #Treina o modelo e salva
     train_model_domain.train_model()
